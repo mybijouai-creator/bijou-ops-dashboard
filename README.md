@@ -11,6 +11,17 @@ Single-screen command center for Bijou AI's autonomous agent operations.
 
 ## Run locally
 
+### Windows (one-click)
+```batch
+bijou_dashboard.bat
+```
+
+### Linux/macOS / Cron
+```bash
+bash bijou_dashboard_cron.sh
+```
+
+### Manual
 ```bash
 cd bijou-ops-dashboard
 uv pip install -r requirements.txt
