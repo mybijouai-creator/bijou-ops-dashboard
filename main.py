@@ -6,16 +6,25 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import httpx
-import os
+
+
+BASE_DIR = Path(__file__).parent.resolve()
 
 
 def get_env(key: str) -> str:
+    # Production / CI values are always read from the environment first.
+    value = os.environ.get(key, "")
+    if value:
+        return value
+    # Local dev fallback: parse the Hermes env file on Windows.
     env_path = Path(r"C:\Users\W3jde\AppData\Local\hermes\.env")
     if env_path.exists():
         for line in env_path.read_text(encoding="utf-8").splitlines():
-            if line.startswith(key + "="):
-                return line[len(key) + 1:].strip().strip('"').strip("'")
-    return os.environ.get(key, "")
+            if line.startswith(key + "=") and not line.strip().startswith("#"):
+                value = line[len(key) + 1:].strip().strip('"').strip("'")
+                if value:
+                    return value
+    return ""
 
 
 app = FastAPI(title="Bijou Operations Dashboard")
@@ -161,9 +170,9 @@ async def agentmail_unread():
         return {"error": str(e), "time": now_iso()}
 
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 
 @app.get("/{full_path:path}")
 def index(full_path: str):
-    return FileResponse("static/index.html")
+    return FileResponse(BASE_DIR / "static" / "index.html")
